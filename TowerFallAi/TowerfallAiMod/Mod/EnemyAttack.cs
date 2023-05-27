@@ -1,9 +1,7 @@
-﻿using Patcher;
-using TowerFall;
+﻿using TowerFall;
 using TowerfallAi.Api;
 
 namespace TowerfallAi.Mod {
-  [Patch("TowerFall.EnemyAttack")]
   public static class ModEnemyAttack {
     public static StateEntity GetState(this EnemyAttack ent) {
       var aiState = new StateEntity {

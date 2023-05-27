@@ -1,10 +1,8 @@
-﻿using Patcher;
-using TowerFall;
+﻿using TowerFall;
 using TowerfallAi.Api;
 using TowerfallAi.Common;
 
 namespace TowerfallAi.Mod {
-  [Patch("TowerFall.EvilCrystal")]
   public static class ModEvilCrystal {
     public static StateEntity GetState(this EvilCrystal ent) {
       var aiState = new StateSubType { type = "evilCrystal" };

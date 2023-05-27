@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Monocle;
-using Patcher;
 using TowerFall;
 using TowerfallAi.Api;
 using TowerfallAi.Common;
 
 namespace TowerfallAi.Mod {
-  [Patch("TowerFall.Skeleton")]
   public static class ModSkeleton{
     public static StateEntity GetState(this Skeleton ent) {
       var aiState = new StateArcher() { type = "archer" };

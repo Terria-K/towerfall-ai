@@ -1,82 +1,82 @@
 ﻿using System;
+using System.Reflection;
 using Microsoft.Xna.Framework;
-using Patcher;
+using MonoMod.RuntimeDetour;
 using TowerFall;
 using TowerfallAi.Core;
 
 namespace TowerfallAi.Mod {
-  [Patch]
-  public class ModTFGame : TFGame {
-    // This allows identifying that TowerFall.exe is patched.
-    public const string AiModVersion = AiMod.Version;
+  public static class ModTFGame {
 
-    Action originalInitialize;
-    Action<GameTime> originalUpdate;
+    private static IDetour hook_Update;
 
-    [STAThread]
-    public static void Main(string[] args) {
-      try {
-        AiMod.ParseArgs(args);
-        typeof(TFGame).GetMethod("$original_Main").Invoke(null, new object[] { args });
-      } catch (Exception exception) {
-        TFGame.Log(exception, false);
-        TFGame.OpenLog();
-      }
+    public static void Load() 
+    {
+      hook_Update = new Hook(
+        typeof(TFGame).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic),
+        Update_patch
+      );
     }
 
-    public ModTFGame(bool noIntro) : base(noIntro) {
-      var ptr = typeof(TFGame).GetMethod("$original_Initialize").MethodHandle.GetFunctionPointer();
-      originalInitialize = (Action)Activator.CreateInstance(typeof(Action), this, ptr);
-
-      ptr = typeof(TFGame).GetMethod("$original_Update").MethodHandle.GetFunctionPointer();
-      originalUpdate = (Action<GameTime>)Activator.CreateInstance(typeof(Action<GameTime>), this, ptr);
-
-      if (AiMod.Enabled) {
-        this.InactiveSleepTime = new TimeSpan(0);
-
-        if (AiMod.IsFastrun) {
-          Monocle.Engine.Instance.Graphics.SynchronizeWithVerticalRetrace = false;
-          this.IsFixedTimeStep = false;
-        } else {
-          this.IsFixedTimeStep = true;
-        }
-      }
+    public static void Unload() 
+    {
+      hook_Update.Dispose();
     }
 
-    public override void Initialize() {
-      if (!AiMod.Enabled) {
-        originalInitialize();
+    public delegate void orig_Update(TFGame self, GameTime gameTime);
+
+    public static void Update_patch(orig_Update orig, TFGame self, GameTime gameTime) 
+    {
+      if (!AiMod.Enabled)
+      {
+        orig(self, gameTime);
         return;
       }
-
-      AiMod.PreGameInitialize();
-      originalInitialize();
-      AiMod.PostGameInitialize();
+      AiMod.Update(orig, self, gameTime);
     }
 
-    public override void Update(GameTime gameTime) {
-      if (!AiMod.Enabled) {
-        originalUpdate(gameTime);
-        return;
-      }
+    // public ModTFGame(bool noIntro) : base(noIntro) {
+    //   var ptr = typeof(TFGame).GetMethod("$original_Initialize").MethodHandle.GetFunctionPointer();
+    //   originalInitialize = (Action)Activator.CreateInstance(typeof(Action), this, ptr);
 
-      AiMod.Update(originalUpdate);
-    }
+    //   ptr = typeof(TFGame).GetMethod("$original_Update").MethodHandle.GetFunctionPointer();
+    //   originalUpdate = (Action<GameTime>)Activator.CreateInstance(typeof(Action<GameTime>), this, ptr);
 
-    public override void Draw(GameTime gameTime) {
-      if (!AiMod.Enabled) {
-        base.Draw(gameTime);
-        return;
-      }
+    //   if (AiMod.Enabled) {
+    //     this.InactiveSleepTime = new TimeSpan(0);
 
-      if (!AiMod.IsMatchRunning() || AiMod.NoGraphics) {
-        Monocle.Engine.Instance.GraphicsDevice.SetRenderTarget(null);
-        return;
-      }
-      base.Draw(gameTime);
-      Monocle.Draw.SpriteBatch.Begin();
-      Agents.Draw();
-      Monocle.Draw.SpriteBatch.End();
-    }
+    //     if (AiMod.IsFastrun) {
+    //       Monocle.Engine.Instance.Graphics.SynchronizeWithVerticalRetrace = false;
+    //       this.IsFixedTimeStep = false;
+    //     } else {
+    //       this.IsFixedTimeStep = true;
+    //     }
+    //   }
+    // }
+
+    // public override void Update(GameTime gameTime) {
+    //   if (!AiMod.Enabled) {
+    //     originalUpdate(gameTime);
+    //     return;
+    //   }
+
+    //   AiMod.Update(originalUpdate);
+    // }
+
+    // public override void Draw(GameTime gameTime) {
+    //   if (!AiMod.Enabled) {
+    //     base.Draw(gameTime);
+    //     return;
+    //   }
+
+    //   if (!AiMod.IsMatchRunning() || AiMod.NoGraphics) {
+    //     Monocle.Engine.Instance.GraphicsDevice.SetRenderTarget(null);
+    //     return;
+    //   }
+    //   base.Draw(gameTime);
+    //   Monocle.Draw.SpriteBatch.Begin();
+    //   Agents.Draw();
+    //   Monocle.Draw.SpriteBatch.End();
+    // }
   }
 }

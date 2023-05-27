@@ -78,6 +78,11 @@ namespace TowerfallAi.Common {
       return (Func<T>)Activator.CreateInstance(typeof(Func<T>), inst, ptr);
     }
 
+    public static Func<T1, T2> GetFunction<T1, T2>(string name, object inst) {
+      var ptr = inst.GetType().GetMethod(name).MethodHandle.GetFunctionPointer();
+      return (Func<T1, T2>)Activator.CreateInstance(typeof(Func<T1, T2>), inst, ptr);
+    }
+
     public static Action GetAction(string name, object inst) {
       var ptr = inst.GetType().GetMethod(name).MethodHandle.GetFunctionPointer();
       return (Action)Activator.CreateInstance(typeof(Action), inst, ptr);

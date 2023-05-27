@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using TowerFall;
 using TowerfallAi.Common;
 using TowerfallAi.Data;
+using TowerfallAi.Mod;
 
 namespace TowerfallAi.Core {
   /// <summary>
@@ -73,11 +74,12 @@ namespace TowerfallAi.Core {
     }
 
     public static void ParseArgs(string[] args) {
-      for (int i = 0; i < args.Length; i++) {
-        if (args[i] == "--aimod") {
-          Enabled = true;
-        }
-      }
+      Enabled = true;
+      // for (int i = 0; i < args.Length; i++) {
+      //   if (args[i] == "--aimod") {
+      //     Enabled = true;
+      //   }
+      // }
     }
 
     public static void LoadConfigFromPath() {
@@ -127,7 +129,7 @@ namespace TowerfallAi.Core {
       Logger.Info("Post Game Initialize.");
     }
 
-    public static void Update(Action<GameTime> originalUpdate) {
+    public static void Update(ModTFGame.orig_Update originalUpdate, TFGame self, GameTime gameTime) {
       int fps = IsMatchRunning() ? Config.fps : 10;
       if (fps > 0) {
         fpsWatch.Stop();
@@ -153,7 +155,7 @@ namespace TowerfallAi.Core {
 
       if (PreUpdate()) {
         try {
-          originalUpdate(GetGameTime());
+          originalUpdate(self, GetGameTime());
         } catch (AggregateException aggregateException) {
           foreach (var innerException in aggregateException.Flatten().InnerExceptions) {
             HandleFailure(innerException);

@@ -24,7 +24,7 @@ namespace TowerfallAi.Core {
     public RemoteConnection(Socket socket) {
 
       this.socket = socket;
-      TaskEx.Run(() => { 
+      Task.Run(() => { 
         try {
           while (true) {
             int bytesRead = socket.Receive(headerBuffer, 0, headerSize, SocketFlags.None);

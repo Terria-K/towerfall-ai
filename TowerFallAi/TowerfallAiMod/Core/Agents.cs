@@ -122,7 +122,7 @@ namespace TowerfallAi.Core {
         Logger.Info("Sending stateInit to agent {0}.".Format(connection.index));
         connection.Send(initMessage, frame);
 
-        var task = TaskEx.Run(async () => {
+        var task = Task.Run(async () => {
           Message reply = await connection.ReceiveAsync(AiMod.Config.agentTimeout, cancelAgentCommunication);
           if (!reply.success) {
             throw new Exception("Agent didn't ack state init: {0}".Format(reply.message));
@@ -141,7 +141,7 @@ namespace TowerfallAi.Core {
         Logger.Info("Notify level load to agent {0}.".Format(connection.index));
         connection.Send(scenarioMessage, frame);
 
-        var task = TaskEx.Run(async () => {
+        var task = Task.Run(async () => {
           Message reply = await connection.ReceiveAsync(AiMod.Config.agentTimeout, cancelAgentCommunication);
           if (!reply.success) {
             throw new Exception("Agent didn't ack state init: {0}".Format(reply.message));
@@ -158,7 +158,7 @@ namespace TowerfallAi.Core {
     }
 
     private static void WaitAllAndClear(List<Task> tasks) {
-      TaskEx.WhenAll(tasks).Wait();
+      Task.WhenAll(tasks).Wait();
       tasks.Clear();
     }
 
@@ -263,7 +263,7 @@ namespace TowerfallAi.Core {
         if (connection == null) continue;
 
         connection.Send(serializedStateUpdate, frame);
-        var task = TaskEx.Run(async () => {
+        var task = Task.Run(async () => {
           Message message = await connection.ReceiveAsync(AiMod.Config.agentTimeout, cancelAgentCommunication);
           if (message.id != stateUpdate.id) {
             throw new Exception($"Ids don't match. Expected: {stateUpdate.id}, Actual: {message.id}");
@@ -383,9 +383,15 @@ namespace TowerfallAi.Core {
       stateUpdate.entities.Clear();
 
       foreach (var ent in level.Layers[0].Entities) {
-        Type type = ent.GetType();
+        Type entType = ent.GetType();
+        Type type = typeof(TowerFallAiModule).Assembly.GetType("TowerfallAi.Mod.Mod" + entType.Name);
+        if (type == null) 
+        {
+          Logger.Error($"TowerfallAi.Mod.Mod{entType.Name} does not exists!");
+          continue;
+        }
         Func<Entity, StateEntity> getState;
-        if (!getStateFunctions.TryGetValue(type, out getState)) continue;
+        if (!getStateFunctions.TryGetValue(entType, out getState)) continue;
 
         StateEntity state;
         if (getState != null) {

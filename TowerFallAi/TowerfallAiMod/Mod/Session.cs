@@ -1,23 +1,26 @@
 ﻿using System;
-using Patcher;
 using TowerFall;
 using TowerfallAi.Common;
 using TowerfallAi.Core;
 
 namespace TowerfallAi.Mod {
-  [Patch]
-  public class ModSession : Session {
-    Action originalOnLevelLoadFinish;
-
-    public ModSession(MatchSettings matchSettings) : base(matchSettings) { 
-      originalOnLevelLoadFinish = Util.GetAction("$original_OnLevelLoadFinish", typeof(Session), this);
+  public class ModSession {
+    public static void Load() 
+    {
+      On.TowerFall.Session.OnLevelLoadFinish += OnLevelLoadFinish_patch;
     }
 
-    public override void OnLevelLoadFinish() {
-      originalOnLevelLoadFinish();
+    public static void Unload() 
+    {
+      On.TowerFall.Session.OnLevelLoadFinish -= OnLevelLoadFinish_patch;
+    }
+
+    private static void OnLevelLoadFinish_patch(On.TowerFall.Session.orig_OnLevelLoadFinish orig, Session self)
+    {
+      orig(self);
 
       if (AiMod.Enabled) {
-        Agents.NotifyLevelLoad(this.CurrentLevel);
+        Agents.NotifyLevelLoad(self.CurrentLevel);
       }
     }
   }

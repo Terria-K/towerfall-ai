@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Monocle;
-using Patcher;
 using TowerFall;
 using TowerfallAi.Api;
 using TowerfallAi.Common;
 using TowerfallAi.Core;
 
 namespace TowerfallAi.Mod {
-  [Patch("TowerFall.Player")]
-  public static class ModPlayer{
+  public static class ModPlayer
+  {
     public static StateEntity GetState(this Player ent) {
       var aiState = new StateArcher() { type = "archer" };
 
@@ -27,7 +27,7 @@ namespace TowerfallAi.Mod {
       aiState.dead = ent.Dead;
       aiState.facing = (int)ent.Facing;
       aiState.onGround = ent.OnGround;
-      aiState.onWall = ent.CanWallJump(Facing.Left) || ent.CanWallJump(Facing.Right);
+      aiState.onWall = CanWallJump(ent, Facing.Left) || CanWallJump(ent, Facing.Right);
       Vector2 aim = Calc.AngleToVector(ent.AimDirection, 1);
       aiState.aimDirection = new Vec2 {
         x = aim.X,
@@ -36,6 +36,10 @@ namespace TowerfallAi.Mod {
       aiState.team = AgentConfigExtension.GetTeam(ent.TeamColor);
 
       return aiState;
+    }
+    private static bool CanWallJump(Player self, Facing dir)
+    {
+      return !self.HasWings && !self.CollideCheck(GameTags.Solid, self.Position + Vector2.UnitY * 5f) && self.CollideCheck(GameTags.Solid, WrapMath.Vec(self.X + (float)((Facing)(2 * (int)dir)), self.Y));
     }
   }
 }

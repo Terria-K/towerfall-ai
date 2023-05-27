@@ -1,10 +1,8 @@
-﻿using Patcher;
-using TowerFall;
+﻿using TowerFall;
 using TowerfallAi.Api;
 using TowerfallAi.Common;
 
 namespace TowerfallAi.Mod {
-  [Patch("TowerFall.Ghost")]
   public static class ModGhost {
     public static StateEntity GetState(this Ghost ent) {
       var aiState = new StateSubType { type = "ghost" };

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Monocle;
-using Patcher;
 using TowerFall;
 using TowerfallAi.Api;
 using TowerfallAi.Common;
@@ -9,17 +8,6 @@ using System.Reflection;
 using Microsoft.Xna.Framework;
 
 namespace TowerfallAi.Mod {
-  [Patch]
-  public class ModEntity : Entity {
-    public override void Update() {
-      try {
-        base.Update();
-      } catch (Exception ex) {
-        throw new Exception(GetType().ToString(), ex);
-      }
-    }
-  }
-
   public static class ExtEntity {
     static Dictionary<Entity, int> ids = new Dictionary<Entity, int>();
 

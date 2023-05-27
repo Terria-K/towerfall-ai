@@ -1,13 +1,13 @@
 ﻿using System.Reflection;
 using Monocle;
-using Patcher;
 using TowerFall;
 using TowerfallAi.Api;
 using TowerfallAi.Common;
 
 namespace TowerfallAi.Mod {
-  [Patch("TowerFall.Birdman")]
   public static class ModBirdman {
+    const int ST_IDLE = 0;
+    const int ST_ATTACK = 1;
     public static StateEntity GetState(this Birdman ent) {
       var aiState = new StateEntity { type = "birdman" };
 
@@ -16,10 +16,10 @@ namespace TowerfallAi.Mod {
         aiState.state = "resting";
       } else {
         switch (ent.State) {
-          case Birdman.ST_IDLE:
+          case ST_IDLE:
             aiState.state = "idle";
             break;
-          case Birdman.ST_ATTACK:
+          case ST_ATTACK:
             aiState.state = "attack";
             break;
         }

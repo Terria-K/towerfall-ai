@@ -1,10 +1,8 @@
-﻿using Patcher;
-using TowerFall;
+﻿using TowerFall;
 using TowerfallAi.Api;
 using TowerfallAi.Common;
 
 namespace TowerfallAi.Mod {
-  [Patch("TowerFall.Slime")]
   public static class ModSlime {
     public static StateEntity GetState(this Slime ent) {
       var aiState = new StateSubType { type = "slime" };

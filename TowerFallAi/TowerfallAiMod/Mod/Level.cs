@@ -1,41 +1,46 @@
 ﻿using System;
+using System.Reflection;
 using System.Xml;
-using Microsoft.Xna.Framework;
-using Monocle;
-using Patcher;
+using MonoMod.RuntimeDetour;
 using TowerFall;
 using TowerfallAi.Core;
 
-namespace TowerfallAi.Mod {
-  [Patch]
-  public class ModLevel : Level {
-    Action originalUpdate;
+namespace TowerfallAi.Mod
+{
+  public static class ModLevel 
+  {
+    private static IDetour hook_HandlePausing;
+    public static void Load() 
+    {
+      hook_HandlePausing = new Hook(
+        typeof(Level).GetMethod("HandlePausing", BindingFlags.Instance | BindingFlags.NonPublic),
+        HandlePausing_patch
+      );
+      On.TowerFall.Level.Update += Update_patch;
+    }
 
-		Action originalHandlePausing;
+    public static void Unload() 
+    {
+      On.TowerFall.Level.Update -= Update_patch;
+    }
 
-    public ModLevel(Session session, XmlElement xml) : base(session, xml) {
-      var ptr = typeof(Level).GetMethod("$original_Update").MethodHandle.GetFunctionPointer();
-      originalUpdate = (Action)Activator.CreateInstance(typeof(Action), this, ptr);
+    private static void Update_patch(On.TowerFall.Level.orig_Update orig, Level self)
+    {
+      if (AiMod.Enabled)
+        Agents.RefreshInputFromAgents(self);
+      
+      orig(self);
+    }
 
-			ptr = typeof(Level).GetMethod("$original_HandlePausing").MethodHandle.GetFunctionPointer();
-      originalHandlePausing = (Action)Activator.CreateInstance(typeof(Action), this, ptr);
-		}
+    private delegate void orig_HandlePausing(Level self);
 
-		public override void HandlePausing() {
-      // Avoid pausing when no human is playing and the screen goes out of focus.
+    private static void HandlePausing_patch(orig_HandlePausing orig, Level self) 
+    {
 			if (AiMod.Enabled && !AiMod.IsHumanPlaying()) {
         return;
       }
 
-      originalHandlePausing();
-    }
-
-		public override void Update() {
-      if (AiMod.Enabled) {
-        Agents.RefreshInputFromAgents(this);
-      }
-
-      originalUpdate();
+      orig(self);
     }
   }
 }

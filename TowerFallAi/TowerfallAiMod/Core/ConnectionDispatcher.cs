@@ -134,11 +134,11 @@ namespace TowerfallAi.Core {
     private void ListenToNewConfigConnection(RemoteConnection connection) {
       openConfigConnection = connection;
       UnregisterFromPool();
-      TaskEx.Run(async () => {
+      Task.Run(async () => {
         await connection.WaitDisconnectAsync();
         RegisterInPool();
       });
-      TaskEx.Run(() => {
+      Task.Run(() => {
         try {
           Logger.Info("Start listening to new config connection.");
           while (true) {
@@ -179,7 +179,7 @@ namespace TowerfallAi.Core {
         }
 
         Logger.Info("Reconfiguration started.");
-        TaskEx.Run(async () => {
+        Task.Run(async () => {
           try {
             List<RemoteConnection> connections = await WaitForConnectionsAsync(connectionsRequired);
             AiMod.ReconfigOperation reconfigOperation = new AiMod.ReconfigOperation() {

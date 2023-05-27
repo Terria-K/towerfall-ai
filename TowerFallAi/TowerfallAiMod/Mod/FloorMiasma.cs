@@ -1,16 +1,16 @@
-﻿using Patcher;
+﻿using MonoMod.Utils;
 using TowerFall;
 using TowerfallAi.Api;
 
 namespace TowerfallAi.Mod {
-  [Patch("TowerFall.FloorMiasma")]
   public static class ModFloorMiasma {
     public static StateEntity GetState(this FloorMiasma ent) {
-      if (ent.state == FloorMiasma.States.Invisible) return null;
+      var state = DynamicData.For(ent).Get<FloorMiasma.States>("state");
+      if (state == FloorMiasma.States.Invisible) return null;
 
       var aiState = new StateEntity { type = Types.FloorMiasma };
       
-      if (ent.state == FloorMiasma.States.Dangerous) {
+      if (state == FloorMiasma.States.Dangerous) {
         aiState.canHurt = true;
       }
 

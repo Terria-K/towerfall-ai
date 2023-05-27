@@ -51,7 +51,7 @@ namespace TowerfallAi.Core {
 
       listener.Listen(10);
       Logger.Info("Starting server thread.");
-      serverTask = TaskEx.Run(() => {
+      serverTask = Task.Run(() => {
         try {
           Logger.Info("Server thread started.");
           while (true) {

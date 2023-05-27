@@ -96,7 +96,7 @@ namespace TowerfallAi.Common {
     }
 
     private async Task FailAfterTimeout(TimeSpan timeout, TaskCompletionSource<T> tcs) {
-      await TaskEx.Delay(timeout);
+      await Task.Delay(timeout);
       Console.WriteLine($"Timeout: {timeout} {tcs.Task.Status}");
       lock (queueLock) {
         if (tcs.Task.IsAlive()) {

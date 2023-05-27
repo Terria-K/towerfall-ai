@@ -12,7 +12,6 @@ public sealed class TowerFallAiModule : FortModule
     public override void Load()
     {
         AiMod.ParseArgs(null);
-        RiseCore.DisallowInputReplacement = true;
         RiseCore.Events.OnPreInitialize += OnPreInitialize;
         RiseCore.Events.OnPostInitialize += OnPostInitialize;
         RiseCore.Events.OnAfterRender += OnAfterRender;
